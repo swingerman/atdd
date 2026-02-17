@@ -160,6 +160,26 @@ Add `generated-acceptance-tests/` and `acceptance-pipeline/ir/` to
   what behavior is being tested by reading the generated test
 - Runner script has clear error messages if any stage fails
 - Pipeline is idempotent — running it twice produces the same result
+- Each generated test must **clear/reset all application state** before
+  running to ensure test isolation
+- Generated test names must include **source file name and line number**
+  (e.g., `authentication.txt:7`) for traceability back to the spec
+- Mock non-deterministic behavior (random numbers, timestamps, UUIDs)
+  in generated tests to ensure reproducibility
+- If a spec directive cannot be translated, **generate it as a failing
+  test** documenting the desired behavior, and report which spec and why
+
+## Immutability Rules
+
+- **Never modify generated test files** directly. They are regenerated
+  from specs via the pipeline. Any manual edits will be overwritten.
+- **Never modify generated IR files** directly. They are regenerated
+  from the `.txt` spec files.
+- Add `generated-acceptance-tests/` and `acceptance-pipeline/ir/` to
+  `.gitignore` — never commit generated artifacts.
+- The runner script must **check modification dates**: if a `.txt` spec
+  is newer than its IR or generated test, re-parse and regenerate
+  before running tests.
 
 ## When Updating an Existing Pipeline
 

@@ -146,6 +146,44 @@ If leakage is found, clean the specs back to domain language.
 Return to Step 1 for the next feature. Each iteration adds specs only
 for the current feature — never design the whole system upfront.
 
+## Rules
+
+These rules govern how spec files and the pipeline are handled.
+They are non-negotiable.
+
+### Spec file discipline
+- **Never modify a spec `.txt` file without explicit user permission.**
+  Specs are the user's contract. Always ask before changing them.
+- If a directive in a spec is ambiguous, **report the ambiguity rather
+  than guessing**. Let the user clarify.
+
+### Pipeline discipline
+- **Never modify generated test files** in `generated-acceptance-tests/`.
+  Only delete and regenerate them by running the pipeline from the `.txt`
+  source.
+- **Generated files are gitignored.** Add `generated-acceptance-tests/`
+  and `acceptance-pipeline/ir/` to `.gitignore`. Never commit generated
+  artifacts.
+- Before running the pipeline, **check modification dates**: if a `.txt`
+  spec file is newer than its IR or generated test, re-parse and
+  regenerate before running.
+- **Clear state before each test.** Generated tests must reset all
+  application state before each test case to ensure isolation.
+
+### Failure handling
+- On test failure, **report the source spec file name and line number**
+  of the first GIVEN line for the failing test. Traceability back to
+  the spec is critical.
+- If a spec cannot be translated into a test, **still generate it as a
+  failing test** that documents the desired behavior. Report to the user
+  which spec and why it could not be fully translated.
+- Mock non-deterministic behavior (random numbers, timestamps, etc.) in
+  generated tests to ensure reproducibility.
+
+### Before pushing
+- Before a git push, **ask the user whether acceptance tests should be
+  run**. Do not push without confirming both test streams pass.
+
 ## Anti-Patterns to Watch For
 
 ### "Let me just write the code first"
