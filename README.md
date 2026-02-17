@@ -101,6 +101,8 @@ The spec-guardian agent reviews your specs for implementation details that shoul
 
 For larger features, you can orchestrate an agent team that follows the ATDD workflow. The team lead coordinates specialist agents — each with a clear role and strict instructions.
 
+> **Tip:** The plugin includes an `atdd-team` skill that automates team setup and orchestration. Just say "build [feature] with a team" and the skill handles role creation, phase sequencing, and prompt generation. If you already have an active team, the skill will offer to extend it with ATDD roles rather than replacing it.
+
 ### Team Roles
 
 | Role | Agent Type | Responsibility |
@@ -305,6 +307,7 @@ Specs must describe what the system does, not how it does it:
 | Component | Name | Purpose |
 |-----------|------|---------|
 | Skill | `atdd` | Core 7-step ATDD workflow: specs → pipeline → red/green → iterate |
+| Skill | `atdd-team` | Orchestrates an agent team for ATDD — handles team setup, role assignment, and phase sequencing |
 | Agent | `spec-guardian` | Catches implementation leakage in Given/When/Then statements |
 | Agent | `pipeline-builder` | Generates bespoke parser → IR → test generator for your project |
 | Command | `/atdd:atdd` | Start the ATDD workflow for a new feature |

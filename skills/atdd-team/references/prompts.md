@@ -1,0 +1,311 @@
+# ATDD Team — Prompt Templates
+
+Detailed prompt templates for each phase of the team-based ATDD workflow.
+Adapt placeholders (`[feature description]`, `[feature-name]`,
+`[project test command]`) to the specific project.
+
+---
+
+## Team Creation
+
+### When no team exists
+
+```
+Create a team called "atdd-[feature-name]" with the following teammates:
+
+1. "spec-writer" (general-purpose) — Writes Given/When/Then acceptance
+   test specs. Has the atdd plugin installed. Must follow the /atdd:atdd
+   skill strictly. Never uses implementation language in specs.
+
+2. "implementer" (general-purpose) — Implements features using TDD.
+   Writes unit tests first, then code, until both acceptance tests and
+   unit tests pass. Never modifies spec files.
+
+3. "reviewer" (general-purpose) — Reviews specs for implementation
+   leakage and reviews code for quality. Has the atdd plugin installed.
+   Uses /atdd:spec-check. Read-heavy role — primarily analyzes, does
+   not write production code.
+```
+
+### When extending an existing team
+
+```
+Add the following ATDD roles to the existing team "[team-name]":
+
+[Include only roles that don't already exist by name]
+
+1. "spec-writer" (general-purpose) — Writes Given/When/Then acceptance
+   test specs following the atdd plugin's /atdd:atdd skill.
+
+2. "implementer" (general-purpose) — Implements features using TDD
+   until both acceptance tests and unit tests pass.
+
+3. "reviewer" (general-purpose) — Reviews specs for implementation
+   leakage and reviews code for quality. Has the atdd plugin installed.
+```
+
+---
+
+## Phase 1 — Spec Writing
+
+Send to **spec-writer**:
+
+```
+We're implementing [feature description].
+
+Follow the ATDD workflow from the atdd plugin. Your job:
+
+1. Read the existing codebase to understand the domain language
+   (how does the app refer to users, orders, sessions, etc.?)
+2. Write Given/When/Then specs in specs/[feature-name].txt
+3. Use ONLY external observables — no class names, no API endpoints,
+   no database tables, no framework terms
+4. Each spec file starts with a semicolon comment block describing
+   the behavior
+5. Use periods at the end of each statement
+6. Send me the specs for review before proceeding
+
+CRITICAL: If you're unsure whether a term is domain language or
+implementation language, ask me. Do NOT guess.
+
+Example of what I expect:
+
+;===============================================================
+; User can register with email and password.
+;===============================================================
+GIVEN no registered users.
+
+WHEN a user registers with email "bob@example.com" and password "secret123".
+
+THEN there is 1 registered user.
+THEN the user "bob@example.com" can log in.
+```
+
+### Revision prompt (if specs need changes after review)
+
+Send to **spec-writer**:
+
+```
+The reviewer found issues with specs/[feature-name].txt.
+
+Issues found:
+[paste reviewer's findings]
+
+Revise the specs to fix these issues. Remember:
+- Use domain language only, no implementation details
+- Each spec tests one behavior
+- A non-developer should understand every statement
+
+Send me the revised specs for re-review.
+```
+
+---
+
+## Phase 2 — Spec Review
+
+Send to **reviewer**:
+
+```
+Review the specs in specs/[feature-name].txt for implementation leakage.
+
+Flag ANY of these:
+- Class names, function names, method names
+- Database tables, columns, queries
+- API endpoints, HTTP methods, status codes
+- Framework terms (controller, service, repository, middleware)
+- Internal state or data structures
+- File paths or module names
+
+For each violation, show the bad line and propose a rewrite using
+domain language only.
+
+Also check:
+- Is each spec testing ONE behavior?
+- Are the GIVEN/WHEN/THEN statements clear to a non-developer?
+- Could these specs work for a different implementation language?
+
+Send me your review with a PASS/FAIL verdict.
+```
+
+---
+
+## Phase 3 — Pipeline Generation
+
+Run as team lead, or send to **implementer**:
+
+```
+Generate the test pipeline for this project. Analyze:
+- Language and test framework in use
+- Project structure and existing test patterns
+- The specs in specs/[feature-name].txt
+
+Create the 3-stage pipeline:
+1. Parser — reads specs/*.txt, outputs IR to acceptance-pipeline/ir/
+2. Generator — reads IR, produces runnable tests in
+   generated-acceptance-tests/
+3. Runner script — run-acceptance-tests.sh
+
+The generator must have DEEP knowledge of the codebase internals.
+This is NOT Cucumber. Generated tests should call directly into the
+system — no manual fixture glue.
+
+Run the acceptance tests after generation. They MUST fail (red).
+If they pass, either the behavior already exists or the generator
+isn't testing the right thing.
+
+Report which tests fail and confirm the pipeline is working.
+```
+
+### Pipeline update prompt (when specs changed after initial generation)
+
+```
+The specs in specs/[feature-name].txt have been updated.
+Re-run the pipeline to regenerate tests:
+
+1. Re-parse the updated specs
+2. Regenerate the test files
+3. Run the acceptance tests
+4. Report results
+
+Do NOT modify the spec files. Only regenerate from them.
+```
+
+---
+
+## Phase 4 — Implementation
+
+Send to **implementer**:
+
+```
+The acceptance specs are in specs/[feature-name].txt.
+The test pipeline is set up — run ./run-acceptance-tests.sh to execute.
+
+Implement the feature using TDD:
+
+1. Run acceptance tests first — confirm they FAIL
+2. Pick the simplest failing acceptance test
+3. Write a unit test for the smallest piece needed
+4. Write minimal code to make the unit test pass
+5. Refactor
+6. Repeat 3-5 until that acceptance test passes
+7. Move to the next failing acceptance test
+8. Continue until ALL acceptance tests AND unit tests pass
+
+RULES:
+- Never modify spec files (specs/*.txt) — they are the contract
+- Never modify generated test files — only regenerate via the pipeline
+- If a spec seems wrong or ambiguous, STOP and ask me
+- Run both test streams before reporting done:
+  ./run-acceptance-tests.sh  (acceptance tests)
+  [project test command]      (unit tests)
+- Send me the results when both streams are green
+```
+
+### Unblocking prompt (if implementer reports a spec issue)
+
+Send as team lead after reviewing the issue:
+
+```
+I've reviewed your concern about the spec:
+"[spec line in question]"
+
+[One of these responses:]
+
+A) The spec is correct. The implementation needs to handle this case.
+   Continue implementing.
+
+B) The spec needs revision. I'm sending updated specs to the spec-writer.
+   Pause implementation until I notify you that new specs are ready.
+
+C) The spec is ambiguous. Here's what it means: [clarification].
+   Continue with this interpretation.
+```
+
+---
+
+## Phase 5 — Post-Implementation Review
+
+Send to **reviewer**:
+
+```
+Implementation is complete. Do two reviews:
+
+1. SPEC REVIEW: Run /atdd:spec-check on specs/[feature-name].txt
+   Check if any implementation details leaked into specs during
+   development. Propose cleanups if found.
+
+2. CODE REVIEW: Review the implementation for:
+   - Test quality (are unit tests testing the right things?)
+   - Code structure (does it match what the specs describe?)
+   - Missing edge cases (any specs that should be added?)
+
+Send me both reviews with a PASS/FAIL verdict for each.
+```
+
+### Follow-up prompt (if review found issues)
+
+```
+The reviewer found issues:
+
+SPEC REVIEW: [PASS/FAIL]
+[findings if any]
+
+CODE REVIEW: [PASS/FAIL]
+[findings if any]
+
+[Route to the appropriate agent:]
+
+For spec leakage → send to spec-writer for cleanup
+For code issues → send to implementer for fixes
+For missing specs → send to spec-writer, then repeat from Phase 2
+```
+
+---
+
+## Completion
+
+### Wrap-up prompt to user
+
+```
+ATDD team workflow complete for [feature description].
+
+Results:
+- Specs: specs/[feature-name].txt (reviewed, no leakage)
+- Acceptance tests: ALL PASSING
+- Unit tests: ALL PASSING
+- Code review: CLEAN
+
+Next steps:
+1. Commit the changes?
+2. Start the next feature with the team?
+3. Shut down the team?
+```
+
+### Shutdown prompt
+
+Send a `shutdown_request` message to each teammate (`spec-writer`,
+`implementer`, `reviewer`) using the SendMessage tool. The team
+framework handles graceful shutdown — each agent receives the request
+and confirms before exiting.
+
+---
+
+## Handling Edge Cases
+
+### Spec-writer and implementer disagree
+
+The team lead arbitrates. Read the spec, read the implementation concern,
+decide whether the spec or implementation needs to change. Never let the
+implementer unilaterally modify specs.
+
+### Pipeline can't handle a spec
+
+The spec may need to be broken into smaller behaviors, or the pipeline
+generator needs improvement. Ask the implementer to update the generator,
+NOT the spec. Specs describe what, generators figure out how to test it.
+
+### Reviewer finds leakage after implementation
+
+This is expected and normal. Route the finding to the spec-writer for
+cleanup. The implementer does NOT need to change code — leakage cleanup
+only affects spec wording, not behavior.
