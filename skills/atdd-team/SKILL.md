@@ -4,10 +4,14 @@ description: >-
   This skill should be used when the user asks to "build a feature with a team",
   "use ATDD with agents", "create an ATDD team", "set up a team for ATDD",
   "orchestrate agents for ATDD", "use team-based development", "coordinate
-  agents for feature development", or "run the ATDD workflow with teammates".
-  It orchestrates a three-agent team (spec-writer, implementer, reviewer)
-  through a five-phase ATDD workflow: spec writing, spec review, pipeline
-  generation, implementation, and post-implementation review.
+  agents for feature development", "run the ATDD workflow with teammates",
+  "add ATDD to my team", "extend my team with ATDD", "join the team with
+  ATDD agents", "add spec-writer and reviewer to the team", or "add ATDD
+  roles to the existing team". It orchestrates a three-agent team
+  (spec-writer, implementer, reviewer) through a five-phase ATDD workflow:
+  spec writing, spec review, pipeline generation, implementation, and
+  post-implementation review. Supports extending an existing team with
+  ATDD roles without replacing current teammates.
 version: 0.2.0
 ---
 
