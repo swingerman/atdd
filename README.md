@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Claude Code Plugin](https://img.shields.io/badge/Claude%20Code-Plugin-blueviolet)](https://github.com/swingerman/atdd)
-[![Version](https://img.shields.io/badge/version-0.2.0-green)](https://github.com/swingerman/atdd)
+[![Version](https://img.shields.io/badge/version-0.3.0-green)](https://github.com/swingerman/atdd)
 
 A [Claude Code](https://code.claude.com) plugin that enforces the **Acceptance Test Driven Development** (ATDD) methodology when building software with AI. Write human-readable Given/When/Then specs before code, generate project-specific test pipelines, and maintain the discipline of two-stream testing.
 

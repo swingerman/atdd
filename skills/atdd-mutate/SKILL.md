@@ -9,7 +9,7 @@ description: >-
   or mutant survival in the context of testing. It adds a third validation
   layer to the ATDD workflow: after acceptance tests verify WHAT and unit
   tests verify HOW, mutation testing verifies that tests actually catch bugs.
-version: 0.2.0
+version: 0.3.0
 ---
 
 # Mutation Testing
