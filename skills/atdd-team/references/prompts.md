@@ -281,6 +281,53 @@ Next steps:
 3. Shut down the team?
 ```
 
+---
+
+## Phase 6 — Mutation Testing (Optional)
+
+Send to **reviewer** or **implementer**:
+
+```
+Both test streams are green and code review is clean.
+Now verify test quality with mutation testing.
+
+1. Run /atdd:mutate to set up the mutation framework and run mutations
+2. Review the mutation score and surviving mutants
+3. For each survivor, determine:
+   - Is it a real test gap? → write a unit test to kill it
+   - Is it an equivalent mutant? → document and ignore
+4. Run /atdd:kill-mutants to write tests for real survivors
+5. Re-run /atdd:mutate to confirm kills
+
+Target: 90%+ mutation score.
+
+RULES:
+- Only add new tests — never modify existing tests or source code
+- Never mutate spec files or generated test files
+- If a surviving mutant reveals a real BUG in source code, report
+  it to me instead of writing a test for the buggy behavior
+
+Send me the mutation score (before and after) and any remaining
+equivalent mutants.
+```
+
+### If mutation score is low
+
+```
+The mutation score is [X]% — below the 90% target.
+
+Focus on the [N] surviving mutants in these files:
+[list files with most survivors]
+
+For each survivor, write a targeted unit test that exercises the
+exact code path. Re-run mutations after each batch of new tests
+to track progress.
+
+Send me updates as the score improves.
+```
+
+---
+
 ### Shutdown prompt
 
 Send a `shutdown_request` message to each teammate (`spec-writer`,

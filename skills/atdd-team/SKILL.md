@@ -145,6 +145,23 @@ Two reviews:
 
 For the detailed prompt template, see `references/prompts.md` — Phase 5.
 
+### Phase 6 — Mutation Testing (Optional)
+
+**Assign to:** `reviewer` or `implementer`
+
+After both test streams are green and reviews pass, run mutation testing
+to verify test quality:
+
+1. Run `/atdd:mutate` to generate mutants and measure mutation score
+2. Analyze surviving mutants — identify real test gaps vs. equivalent mutants
+3. Run `/atdd:kill-mutants` to write targeted tests for survivors
+4. Re-run mutations to confirm kills
+
+**Gate:** Mutation score meets target (90%+ recommended). Remaining
+survivors documented as equivalent mutants.
+
+For the detailed prompt template, see `references/prompts.md` — Phase 6.
+
 ## After Completion
 
 When all phases pass:

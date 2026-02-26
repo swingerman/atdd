@@ -34,7 +34,9 @@ This plugin solves both problems by enforcing the ATDD workflow and guarding aga
                     ↓
 5. Review specs for implementation leakage
                     ↓
-6. Iterate — next feature, back to step 1
+6. Mutation testing → verify tests actually catch bugs
+                    ↓
+7. Iterate — next feature, back to step 1
 ```
 
 The generated pipeline is NOT like Cucumber. It's what Uncle Bob calls "a strange hybrid of Cucumber and the test fixtures" — the parser/generator has **deep knowledge of your system's internals** and produces complete, runnable tests. No manual fixture code needed.
@@ -284,6 +286,46 @@ Send me both reviews.
 - **Scope tightly.** Each team cycle should cover one feature. Don't spec the whole system — spec what you're building now.
 - **Verify both streams.** Before accepting the implementer's work, run both the acceptance tests and unit tests yourself.
 
+## Mutation Testing
+
+Mutation testing adds a **third validation layer**: after acceptance tests verify WHAT and unit tests verify HOW, mutation testing verifies that your tests **actually catch bugs**.
+
+It works by introducing deliberate bugs (mutants) into your source code and checking whether your tests detect them. A project with 100% code coverage can still have a 60% mutation score — meaning 40% of bugs would go undetected.
+
+```
+Three validation layers:
+1. Acceptance tests  → verify WHAT (external behavior)
+2. Unit tests        → verify HOW  (internal structure)
+3. Mutation testing  → verify REAL? (do tests catch bugs?)
+```
+
+### Quick Start
+
+```
+/atdd:mutate                    # run mutation testing
+/atdd:mutate src/auth/          # target specific module
+/atdd:kill-mutants              # write tests to kill survivors
+```
+
+### Supported Frameworks
+
+The plugin auto-detects your language and configures the right tool:
+
+| Language | Framework |
+|----------|-----------|
+| JavaScript/TypeScript | [Stryker](https://stryker-mutator.io/) |
+| Python | [mutmut](https://github.com/boxed/mutmut) |
+| Java/JVM | [PIT](https://pitest.org/) |
+| C# | [Stryker.NET](https://stryker-mutator.io/) |
+| Rust | [cargo-mutants](https://github.com/sourcefrog/cargo-mutants) |
+| Go | [go-mutesting](https://github.com/zimmski/go-mutesting) |
+| Ruby | [mutant](https://github.com/mbj/mutant) |
+| Scala | [Stryker4s](https://stryker-mutator.io/) |
+
+### In the Team Workflow
+
+When using the `atdd-team` skill, mutation testing is **Phase 6** — run after post-implementation review, before declaring the feature done.
+
 ## GWT Spec Format
 
 Specs use an opinionated, human-readable Given/When/Then format:
@@ -318,10 +360,13 @@ Specs must describe what the system does, not how it does it:
 |-----------|------|---------|
 | Skill | `atdd` | Core 7-step ATDD workflow: specs → pipeline → red/green → iterate |
 | Skill | `atdd-team` | Orchestrates an agent team for ATDD — handles team setup, role assignment, and phase sequencing |
+| Skill | `atdd-mutate` | Mutation testing workflow — setup framework, run mutations, analyze and kill surviving mutants |
 | Agent | `spec-guardian` | Catches implementation leakage in Given/When/Then statements |
 | Agent | `pipeline-builder` | Generates bespoke parser → IR → test generator for your project |
 | Command | `/atdd:atdd` | Start the ATDD workflow for a new feature |
 | Command | `/atdd:spec-check` | Audit specs for implementation leakage |
+| Command | `/atdd:mutate` | Run mutation testing to verify test quality |
+| Command | `/atdd:kill-mutants` | Analyze surviving mutants and write tests to kill them |
 | Hook | PreToolUse | Soft warning when writing code without acceptance specs |
 | Hook | Stop | Reminder to verify both test streams pass |
 
