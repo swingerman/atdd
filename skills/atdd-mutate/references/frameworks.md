@@ -2,6 +2,9 @@
 
 Detailed setup, configuration, and usage for each supported framework.
 
+> **Note:** Version numbers below are as of February 2026. Check each
+> framework's website for the latest versions before installing.
+
 ---
 
 ## JavaScript / TypeScript — Stryker

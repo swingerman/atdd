@@ -3,7 +3,7 @@ name: atdd-mutate
 description: >-
   This skill should be used when the user asks to "run mutation testing",
   "mutate my code", "kill mutants", "check test quality", "find surviving
-  mutants", "improve test coverage with mutations", "run stryker", "run
+  mutants", "verify test effectiveness with mutations", "run stryker", "run
   mutmut", "run pitest", "set up mutation testing", "how good are my tests",
   "are my tests catching bugs", or mentions mutation testing, mutation score,
   or mutant survival in the context of testing. It adds a third validation
@@ -48,17 +48,19 @@ quality check at any point during development.
 
 Detect the project language and select the appropriate mutation framework:
 
-| Language | Framework | Install | Run |
-|----------|-----------|---------|-----|
-| JavaScript/TypeScript | Stryker | `npm init stryker@latest` | `npx stryker run` |
-| Python | mutmut | `pip install mutmut` | `mutmut run` |
-| Java/JVM | PIT (pitest) | Maven/Gradle plugin | `mvn pitest:mutationCoverage` |
-| C# | Stryker.NET | `dotnet tool install dotnet-stryker` | `dotnet stryker` |
-| Scala | Stryker4s | sbt plugin | `sbt stryker` |
-| Rust | cargo-mutants | `cargo install cargo-mutants` | `cargo mutants` |
-| Go | go-mutesting | `go install github.com/zimmski/go-mutesting/cmd/go-mutesting@latest` | `go-mutesting ./...` |
-| Ruby | mutant | `gem install mutant` | `bundle exec mutant run` |
-| Clojure | pitest via lein | lein plugin | `lein with-profile +pitest pitest` |
+| Language | Framework |
+|----------|-----------|
+| JavaScript/TypeScript | [Stryker](https://stryker-mutator.io/) |
+| Python | [mutmut](https://github.com/boxed/mutmut) |
+| Java/JVM | [PIT (pitest)](https://pitest.org/) |
+| C# | [Stryker.NET](https://stryker-mutator.io/) |
+| Scala | [Stryker4s](https://stryker-mutator.io/) |
+| Rust | [cargo-mutants](https://github.com/sourcefrog/cargo-mutants) |
+| Go | [go-mutesting](https://github.com/zimmski/go-mutesting) |
+| Ruby | [mutant](https://github.com/mbj/mutant) |
+| Clojure | pitest via lein-pitest |
+
+For install commands, configuration, and CLI reference, see `references/frameworks.md`.
 
 For the full framework reference and configuration details, see
 `references/frameworks.md`.
