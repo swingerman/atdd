@@ -12,7 +12,7 @@ description: >-
   spec writing, spec review, pipeline generation, implementation, and
   post-implementation review. Supports extending an existing team with
   ATDD roles without replacing current teammates.
-version: 0.3.0
+version: 0.4.0
 ---
 
 # Team-Based ATDD Workflow

@@ -1,6 +1,75 @@
-# Mutation Testing Frameworks Reference
+# Mutation Testing Reference
 
-Detailed setup, configuration, and usage for each supported framework.
+## Preferred Approach: Custom Mutation Tool
+
+The preferred approach is to build a project-specific mutation tool that
+walks the AST/source tree, applies one mutation at a time, runs targeted
+tests, and reports survivors. This follows the methodology Uncle Bob
+developed for [empire-2025](https://github.com/unclebob/empire-2025/blob/master/docs/plans/2026-02-21-mutation-testing.md).
+
+### Architecture
+
+Three modules:
+
+1. **Mutations module** — a rules table mapping original constructs to
+   mutants (e.g., `+` → `-`, `true` → `false`, `>=` → `>`), plus
+   matching logic that walks the AST/form tree
+2. **Runner module** — source-to-test mapping (e.g., `src/foo.ext` →
+   `test/foo_test.ext`), executes tests, captures pass/fail
+3. **Core module** — orchestration: read source → discover mutation
+   sites → apply one at a time → run tests → restore original → report
+
+### Core Mutation Categories
+
+Apply these regardless of language:
+
+| Category | Examples |
+|----------|----------|
+| Arithmetic | `+` ↔ `-`, `*` ↔ `/`, `++` ↔ `--` |
+| Comparison | `>` ↔ `>=`, `<` ↔ `<=` |
+| Equality | `==` ↔ `!=` |
+| Boolean | `true` ↔ `false`, `&&` ↔ `\|\|` |
+| Conditional | `if` ↔ `if-not`, negate conditions |
+| Constant | `0` ↔ `1`, `""` ↔ `"mutant"` |
+| Return value | return `true` → return `false`, return `null` |
+| Void method | remove method call entirely |
+
+**Position-aware matching:** Arithmetic, comparison, and conditional
+mutations apply only in operator/function position. Boolean and constant
+mutations apply anywhere.
+
+### Building the Tool with TDD
+
+Build the custom mutation tool using the same TDD discipline as the rest
+of the ATDD workflow:
+
+1. Write failing tests for the rules table and matching logic
+2. Implement rules and matching
+3. Write failing tests for source-to-test mapping
+4. Implement the runner
+5. Write failing tests for orchestration (apply mutation, run, restore)
+6. Implement the core module
+7. Integration test against a real source file
+
+### Safety
+
+- Hold original file content in memory, restore in `try/finally`
+- Run in a worktree or on a clean working tree
+- `git checkout` recovers from interruptions
+
+### When Custom is Especially Valuable
+
+- Lisps and homoiconic languages (tree walking is natural)
+- Projects with custom or uncommon test runners
+- Languages without established mutation frameworks
+- When you need targeted test execution (run only affected tests per mutant)
+
+---
+
+## Alternative: Existing Frameworks
+
+When rapid setup matters more than tight integration, use an established
+framework. These are secondary options — prefer the custom approach above.
 
 > **Note:** Version numbers below are as of February 2026. Check each
 > framework's website for the latest versions before installing.
@@ -310,9 +379,40 @@ sbt stryker
 
 ---
 
-## Clojure — pitest via lein-pitest
+## Clojure — Custom or pitest
 
-### Install
+Clojure projects have two options:
+
+### Option A: Custom Mutation Tool (Uncle Bob's Approach)
+
+Build a project-specific mutation tool that walks Clojure form trees using
+`postwalk`, applies mutations one at a time, and runs targeted specs. This
+is the approach Uncle Bob uses in [empire-2025](https://github.com/unclebob/empire-2025/blob/master/docs/plans/2026-02-21-mutation-testing.md).
+
+**When to use:** When the project uses Speclj or another Clojure-native
+test framework, and you want tight integration with the source structure.
+
+Architecture (3 namespaces):
+- `mutations` — rules table + matching logic
+- `runner` — shell execution + source-to-spec mapping
+- `core` — orchestration + CLI entry point
+
+Core mutation rules:
+
+| Category | Original | Mutant |
+|----------|----------|--------|
+| Arithmetic | `+` `-` `*` `inc` `dec` | swapped counterparts |
+| Comparison | `>` `>=` `<` `<=` | boundary shifts |
+| Equality | `=` `not=` | swapped |
+| Boolean | `true` `false` | swapped |
+| Conditional | `if`/`if-not` `when`/`when-not` | swapped |
+| Constant | `0` `1` | swapped |
+
+**Important:** Position-aware matching — arithmetic/comparison/conditional
+mutations apply only in function position (first element of a list).
+Boolean and constant mutations apply anywhere.
+
+### Option B: pitest via lein-pitest
 
 ```clojure
 ;; project.clj
@@ -320,8 +420,6 @@ sbt stryker
 :pitest {:target-classes ["empire.*"]
          :target-tests  ["empire.*-spec"]}
 ```
-
-### Run
 
 ```bash
 lein with-profile +pitest pitest

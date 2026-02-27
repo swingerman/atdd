@@ -9,7 +9,7 @@ description: >-
   or mutant survival in the context of testing. It adds a third validation
   layer to the ATDD workflow: after acceptance tests verify WHAT and unit
   tests verify HOW, mutation testing verifies that tests actually catch bugs.
-version: 0.3.0
+version: 0.4.0
 ---
 
 # Mutation Testing
@@ -44,9 +44,51 @@ Run mutation testing **after both test streams are green**:
 This is Phase 6 in the team-based ATDD workflow, or a standalone
 quality check at any point during development.
 
-## Framework Detection
+## Approach: Custom Mutation Tool (Preferred)
 
-Detect the project language and select the appropriate mutation framework:
+The preferred approach is to **build a custom mutation tool** for the
+project. This follows the methodology Uncle Bob developed for
+[empire-2025](https://github.com/unclebob/empire-2025/blob/master/docs/plans/2026-02-21-mutation-testing.md)
+— a project-specific tool that walks the AST/source tree, applies one
+mutation at a time, runs targeted tests, and reports survivors.
+
+### Why Custom is Preferred
+
+- **Tight integration** with the project's test runner and source structure
+- **Targeted execution** — run only the tests affected by each mutation
+- **Language-agnostic** — works for any language, including those without
+  established mutation frameworks
+- **No external dependencies** — the tool lives in the project
+- **AST-level precision** — understands the language's constructs natively
+
+### Architecture (3 modules)
+
+1. **Mutations** — rules table (e.g., `+` → `-`, `true` → `false`,
+   `>=` → `>`) plus matching logic that walks the AST/form tree
+2. **Runner** — source-to-test mapping, test execution, pass/fail capture
+3. **Core** — orchestration: read source → discover sites → apply one
+   at a time → run tests → restore original → report
+
+### Core Mutation Categories
+
+| Category | Examples |
+|----------|----------|
+| Arithmetic | `+` ↔ `-`, `*` ↔ `/`, `++` ↔ `--` |
+| Comparison | `>` ↔ `>=`, `<` ↔ `<=` |
+| Equality | `==` ↔ `!=` |
+| Boolean | `true` ↔ `false`, `&&` ↔ `||` |
+| Conditional | negate conditions, swap if/if-not |
+| Constant | `0` ↔ `1`, `""` ↔ `"mutant"` |
+| Return value | return `true` → return `false` |
+| Void method | remove method call entirely |
+
+For the full architecture and detailed reference, see
+`references/frameworks.md`.
+
+## Alternative: Existing Frameworks
+
+When speed of setup is more important than tight integration, use an
+established mutation framework as a secondary option:
 
 | Language | Framework |
 |----------|-----------|
@@ -54,15 +96,12 @@ Detect the project language and select the appropriate mutation framework:
 | Python | [mutmut](https://github.com/boxed/mutmut) |
 | Java/JVM | [PIT (pitest)](https://pitest.org/) |
 | C# | [Stryker.NET](https://stryker-mutator.io/) |
-| Scala | [Stryker4s](https://stryker-mutator.io/) |
 | Rust | [cargo-mutants](https://github.com/sourcefrog/cargo-mutants) |
 | Go | [go-mutesting](https://github.com/zimmski/go-mutesting) |
 | Ruby | [mutant](https://github.com/mbj/mutant) |
-| Clojure | pitest via lein-pitest |
+| Scala | [Stryker4s](https://stryker-mutator.io/) |
 
-For install commands, configuration, and CLI reference, see `references/frameworks.md`.
-
-For the full framework reference and configuration details, see
+For install commands, configuration, and CLI reference, see
 `references/frameworks.md`.
 
 ## Workflow
@@ -75,14 +114,16 @@ Before running mutation testing, confirm:
 - The project has meaningful unit tests (mutation testing runs against unit tests)
 - No uncommitted changes (mutations modify source files temporarily)
 
-### Step 2: Set Up Framework
+### Step 2: Set Up Mutation Tool
 
-If no mutation framework is configured:
+If no mutation tool is configured:
 
 1. Detect the project language from source files and build config
-2. Install the appropriate framework (see table above)
-3. Configure to target source directories and exclude test/spec/generated files
-4. Exclude `generated-acceptance-tests/` and `acceptance-pipeline/` from mutation
+2. **Preferred:** Build a custom mutation tool following the 3-module
+   architecture (mutations, runner, core). Use TDD to build the tool itself.
+3. **Alternative:** Install an existing framework if rapid setup is needed
+4. Configure to target source directories and exclude test/spec/generated files
+5. Exclude `generated-acceptance-tests/` and `acceptance-pipeline/` from mutation
 
 **Important:** Configure mutation testing to target **source code only**.
 Never mutate test files, spec files, or generated pipeline code.

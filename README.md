@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Claude Code Plugin](https://img.shields.io/badge/Claude%20Code-Plugin-blueviolet)](https://github.com/swingerman/atdd)
-[![Version](https://img.shields.io/badge/version-0.3.0-green)](https://github.com/swingerman/atdd)
+[![Version](https://img.shields.io/badge/version-0.4.0-green)](https://github.com/swingerman/atdd)
 
 A [Claude Code](https://code.claude.com) plugin that enforces the **Acceptance Test Driven Development** (ATDD) methodology when building software with AI. Write human-readable Given/When/Then specs before code, generate project-specific test pipelines, and maintain the discipline of two-stream testing.
 
@@ -307,9 +307,13 @@ Three validation layers:
 /atdd:kill-mutants              # write tests to kill survivors
 ```
 
-### Supported Frameworks
+### Preferred: Custom Mutation Tool
 
-The plugin auto-detects your language and configures the right tool:
+The plugin's preferred approach is to **build a project-specific mutation tool** — a small, TDD-built module that walks the AST, applies one mutation at a time, runs targeted tests, and reports survivors. This follows the approach Uncle Bob developed for [empire-2025](https://github.com/unclebob/empire-2025/blob/master/docs/plans/2026-02-21-mutation-testing.md). It works for any language with no external dependencies.
+
+### Alternative: Existing Frameworks
+
+When rapid setup matters more than tight integration, use an established framework:
 
 | Language | Framework |
 |----------|-----------|
@@ -394,8 +398,10 @@ The pipeline-builder agent analyzes your project and generates the parser/genera
 
 This plugin is an implementation of Robert C. Martin's (Uncle Bob) Acceptance Test Driven Development and Spec Driven Design methodology for Claude Code. The approach, insights, and principles come from:
 
-- [empire-2025](https://github.com/unclebob/empire-2025) — Uncle Bob's project where this approach was developed and refined
+- [empire-2025](https://github.com/unclebob/empire-2025) — Uncle Bob's project where this approach was developed and refined. He has since added his own [Clojure-native mutation testing tool](https://github.com/unclebob/empire-2025/blob/master/docs/plans/2026-02-21-mutation-testing.md) and a [spec structure checker](https://github.com/unclebob/empire-2025/blob/master/docs/plans/2026-02-24-spec-structure-check.md) to the project.
 - His public writings and tweets on ATDD, SDD, and AI-assisted development
+
+Uncle Bob's mutation testing tool is built specifically for Clojure/Speclj — it walks form trees with `postwalk` and runs targeted specs. This plugin takes a **language-agnostic approach**, using established mutation frameworks (Stryker, mutmut, PIT, etc.) so it works with any language and test framework.
 
 This plugin does not contain any code from empire-2025. It adapts the methodology for use as a Claude Code plugin.
 
